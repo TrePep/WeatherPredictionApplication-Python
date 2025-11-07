@@ -1,0 +1,67 @@
+The project utilized historical weather data, implemented specific algorithms for analysis, and developed a user interface for interactive exploration and visualization of the results. The data spans from November 22, 2000, to April 2, 2025, providing a substantial period for identifying both short-term anomalies and long-term patterns.
+
+Anomaly Detection Algorithm
+
+    Algorithm Choice: The Rolling Window Z-score method was selected for anomaly detection.
+    Reason: This algorithm was chosen for several reasons:
+        Simplicity and Interpretability: The Z-score provides a clear, standardized measure of how far a data point deviates from its local mean. 
+        Adaptability: By using a rolling window, the definition of "normal" adapts to the recent history of the time series.
+        Effectiveness for Point Anomalies: It is effective at identifying individual data points that are significantly different from their surrounding values, which aligns well with detecting sudden heavy precipitation events.
+        Computational Efficiency: The calculation within the rolling window is computationally straightforward.
+    Implementation (AnomalyDetector class):
+        A rolling window (default size: 30 days) slides through the time series (precipitation_sum).
+        For each point t, the mean and standard deviation of the precipitation values within the preceding window (t-window_size to t-1) are calculated.
+        The Z-score for the current point t is calculated as abs(value[t] - window_mean) / window_std. 
+        If the Z-score exceeds a predefined threshold (default: 3.0), the data point is flagged as an anomaly.
+        The output is a boolean NumPy array of the same length as the input series, marking True for detected anomalies.
+    Findings:
+      The Rolling Window Z-score method successfully identified days where precipitation significantly exceeded the typical levels observed in the preceding 30 days (using default parameters). Visualizations (anomalies_subplots.png) clearly highlighted these     events as red markers on the time series plots for each selected city. These anomalies typically correspond to significant weather events like heavy storms or sustained rainfall periods. The specific dates and magnitudes flagged depend directly on the chosen window_size and threshold, allowing for tunable sensitivity.
+
+Forcasting Algorithon 
+    Algorithom Choice: Originally started with a linear regression algorithon since it was the easlier but changed to using phrophet which is 
+    devloped by mete. Reason for this is that althought the linear alg was simple to implent my predciton for the next 30 days was almost always 0 and for 
+    that type of alg, 30 days would be many days away from the last date collected that it would not be close to accurate. 
+    The way prohet works is by taling into account longer term trends it analyzes, seasonality in the form or repeating cycles which is this case is on a day to day 
+    basis, and takes into account noise/ randomess to help predict future outcomes based on the data it collects. This makes it a better model to use than linear regression since 
+    unlike the latter it takes into account patters and isn't trying to fit the data into a straight line.
+
+    Implementation of Forcasting Algorithm:
+        Knowing how prophet works I had it analyze data from the past 25 years, taking into account the daily precipitation 
+        data from a single or mutiple cities and using that date we predicited the forcast for the next 30 days. Seasonality is taken into account 
+        in line 71 under the forcasting algorithm by setting seasonality = True. 
+    
+    Findings:Once I switched to using prohet I was able to get forcsastings that were not all 0's and since the latest data we can obtain is 
+    2-3 weeks from the current day I could comapre what it predicted to what acctualy happened and some days it was close as there was light rain some days 
+    but it is harder for prohet to be able to take into account very heavy rainfaily like the other Monday since that was an outlier and those are harder to predict. 
+    Adding more data like temp and windspeed from the past 25 years would help to increase the accurace of prohet and those varibales influence the raina as well. 
+
+Clustering Algorithm:
+    The goal of this algorithm is to group U.S. cities based on similar yearly precipitation patterns.  We analyzed trends and similarities in rainfall data from 2001 to 2024, the tool helps users to visually interpret patterns in climate behavior.
+
+Algorithm Choice:
+	We chose K-Means clustering because it is simple and efficient while still very effective for numeric datasets like precipitation values. It separates the data into distinct, non-overlapping groups based on similarity, using Euclidean distance between cities’ yearly precipitation trends. This algorithm worked particularly well for our task, as each city is represented by a consistent set of annual averages, allowing K-Means to group cities with similar long-term rainfall patterns in a significant and easy to understand way.
+
+Process:
+•   Data Collection
+    o	 Each city’s daily weather is stored in a separate .csv file located in the data directory.
+    o	Each file includes columns for the date and daily precipitation totals.
+    o	The algorithm reads the cities the user selects and filters the data to only include the years 2001 through 2024.
+•   Preprocessing
+    o	The program calculates the average precipitation for each city for each year in the range.
+    o	These values are structured into so that the rows represent years and columns represent cities.
+    o	The resulting matrix contains average yearly precipitation values, which serve as the input features for clustering.
+•   Clustering
+    o	The matrix is transposed so each city becomes a vector of its yearly average precipitation values.
+    o	The user defines the number of clusters, k, to apply in the K-Means algorithm.
+    o	Cities are grouped into clusters based on similarity in precipitation trends over time.
+•   Visualization
+    o	Two subplots are displayed
+           A line graph showing raw yearly average precipitation for each selected city to provide a clear view of each city’s average yearly precipitation.
+           A scatter plot where cities are color-coded by cluster membership to visually represent the outcome of the K-Means clustering.
+    o	In the scatter plot cluster centers are marked as X symbols
+
+Other features:
+	The GUI allows the user to select one or more cities from a scrollable list as well as specify the number of clusters they wish to create.  The application also allows users to download resulting visualizations as PNG files.  
+
+Findings: When using this application with the selected cities—Tallahassee, New York, Los Angeles, Houston, Chicago, Miami, Boston, Phoenix, San Francisco, and Seattle clear patterns emerge. Interestingly, Houston and Phoenix often form their own distinct clusters, though for very different reasons. Houston, with its high levels of rainfall and humid subtropical climate, typically stands apart due to the significant precipitation it receives throughout the year. On the other hand, Phoenix, with its dry desert climate, also stands alone. This sets it apart from cities with more moderate or seasonally varied rainfall patterns, such as Los Angeles or San Francisco.
+	Cities like Miami, Tallahassee, and Seattle often fall into clusters based on similar precipitation trends, consistent rainfall or specific seasonal wetness. Meanwhile, Chicago, Boston, and New York group together likely due to their temperate continental climates and more evenly distributed rainfall. 
